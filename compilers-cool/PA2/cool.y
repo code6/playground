@@ -142,9 +142,19 @@
     %type <expressions>  optional_commas_expr_list commas_expr_list semicolon_expr_list
     %type <expression>  expr let_expr
     %type <cases>  case_expr
+    %type <symbol> E_OBJECTID E_TYPEID
     
     /* Precedence declarations go here. */
-    
+
+    %right ASSIGN
+    %left NOT
+    %nonassoc LE '<' '='
+    %left '+' '-'
+    %left '*' '/'
+    %left ISVOID
+    %left '~'
+    %left '@'
+    %left '.'
     
     %%
     /* 
@@ -160,6 +170,8 @@
     | class_list class	/* several classes */
     { $$ = append_Classes($1,single_Classes($2)); 
     parse_results = $$; }
+    | error
+     {}
     ;
     
     /* If no parent is specified, the class inherits from the Object class. */
@@ -178,12 +190,26 @@
     ;
 
     feature
-    : OBJECTID ':' TYPEID 
-      { $$ = attr($1, $3, new_($3));}
-    | OBJECTID ':' TYPEID ASSIGN expr 
+    : E_OBJECTID ':' E_TYPEID 
+      { $$ = attr($1, $3, no_expr());}
+    | E_OBJECTID ':' E_TYPEID ASSIGN expr 
       { $$ = attr($1, $3, $5);}
-    | OBJECTID '(' optional_formal_list ')' ':' TYPEID '{' expr '}'
+    | E_OBJECTID '(' optional_formal_list ')' ':' E_TYPEID '{' expr '}'
       { $$ = method($1, $3, $6, $8);}
+    ;
+
+    E_TYPEID
+    : TYPEID
+        { $$ = $1; }
+    | error
+      {}
+    ;
+    
+    E_OBJECTID
+    : OBJECTID
+      { $$ = $1; }
+    | error
+      {}
     ;
 
     optional_formal_list
@@ -217,6 +243,10 @@
       { $$ = cond($2, $4, $6); }
     | WHILE expr LOOP expr POOL
       { $$ = loop($2, $4); }
+    | WHILE expr LOOP expr error
+      {}
+    | WHILE expr error expr POOL
+      {}
     | '{' semicolon_expr_list '}'
       { $$ = block($2); }
     | LET let_expr
@@ -255,16 +285,18 @@
       { $$ = bool_const($1); }
     | STR_CONST 
       { $$ = string_const($1); }
+    | expr error
+      {}
     ;
 
     let_expr
-    : OBJECTID ':' TYPEID IN expr
-      { $$ = let($1, $3, new_($3), $5); }
-    |  OBJECTID ':' TYPEID ASSIGN expr IN expr
+    : OBJECTID ':' E_TYPEID IN expr
+      { $$ = let($1, $3, no_expr(), $5); }
+    |  OBJECTID ':' E_TYPEID ASSIGN expr IN expr
       { $$ = let($1, $3, $5, $7); }
-    | OBJECTID ':' TYPEID ',' let_expr
-      { $$ = let($1, $3, new_($3), $5); }
-    | OBJECTID ':' TYPEID DARROW expr ',' let_expr
+    | OBJECTID ':' E_TYPEID ',' let_expr
+      { $$ = let($1, $3, no_expr(), $5); }
+    | OBJECTID ':' E_TYPEID ASSIGN expr ',' let_expr
       { $$ = let($1, $3, $5, $7); }
     ;
 
@@ -294,6 +326,8 @@
       { $$ = single_Expressions($1); }
     | semicolon_expr_list expr ';'
       { $$ = append_Expressions($1, single_Expressions($2)); }
+    | error ';'
+      { $$ = nil_Expressions(); }
     ;
 
     /* end of grammar */
