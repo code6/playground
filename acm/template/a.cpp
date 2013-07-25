@@ -29,6 +29,9 @@ typedef vector<int> VI;
 typedef pair<int, int> PII;
 
 int main() {
+#ifndef ONLINE_JUDGE
+    freopen("c.in", "r", stdin);
+#endif
     vector<PII> vp;
     vp.pb(mp(5, 2));
     vp.pb(mp(3, 4));

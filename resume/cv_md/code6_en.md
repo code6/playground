@@ -7,7 +7,7 @@
 * Topcoder : [code6](http://community.topcoder.com/tc?module=MemberProfile&cr=22758532) 
 
 ##Background
-I am a software engineer with interset in big data and algorithm. I enjoy building tools to simplify everyday job.
+I am a software engineer with interset in big data and algorithm. I enjoy building tools to simplify everyday job. I enjoy algorithm competitions and practice a lot at spare time. 
 
 ## Skill
 
@@ -15,7 +15,7 @@ I am a software engineer with interset in big data and algorithm. I enjoy buildi
 * Familar with data warehouse modeling, the design of ETL flow
 * Have some experience in data platform components development(scheduler, ETL tool)
 * Familar with hive, understand of hadoop ecosystem
-* Familar with common data structure, enjoy algorithm competition
+* Familar with common data structure
 
 
 ## Experience
@@ -40,6 +40,10 @@ I 'm working at meituan data team, I focus on data warehouse/platform tools buil
  
 * Query center Service building  
  Our query center service is the entrance of all queries, including report/api/client. It distributes the query to backend db server(mysql/hive) and caches the query result. I implement the asynchronous query part of the service.
+ 
+<!--
+* upgrade hive version in production 
+-->
 
 
 ## Awards
