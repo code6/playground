@@ -58,15 +58,13 @@
 
     \begin{itemize}[leftmargin=3mm]
         \item ETL tool upgrade\\
-      sqlweaver is our data warehouse ETL tool. At first it only support mysql, I add different database supports by adding a concept called resouce handler and implement hive handler and shard mysql table handler. I add another concept called action which enable loose ETL steps construct and code reuse. 
+      Sqlweaver is our data warehouse ETL tool. At first it only support mysql, I add different database supports by adding a concept called resouce handler and add support to hive and shard mysql table . I add another concept called action which enable loose ETL steps construct and code reuse, which works well for complex ETL tasks.
         \item Data synchronization Tool\\
-    I build a data synchronization tool which supports data synchronization between different type of database(mysql/hive). Users only need to fill in the source and target table info and it will do the rest. It use sqoop to transfer between hive(hadoop) and mysql.
+    I build a data synchronization tool which supports data synchronization between different type of database(mysql/hive). Users only need to fill in the source and target table info and it will do the rest. We use it for our data synchronization tasks.
         \item Migrate log process from Infobright to hive\\
-        I participate in the Infobright to Hive project and I design and carry out the ETL migration plan. I also build a small tool called diff\_checksum to check the table data consistency between different database. This project lasts about two months and we use hive as our mainly data warehouse infrastructure later.
+        I participate in the Infobright to Hive project and I design and carry out the ETL migration plan. I also build a small tool called diff\_checksum to check the table data consistency between the migration. This project lasts about two months and we transform all our infobright based ETLs(about 80) to hive.
         \item Hive authorization and query service enhancement\\
-        Hive authorization is not completely secure, and hiveserver(hive thrift service) is not stable. I manage to wrapper a thrift service called `openhive` above hive cli for hive query need. Later we open our ETL design service to our engineers, I enhance hive authorization by adding some query hook and fixing authorization bugs.
-        \item Query center Service building\\
-        Our query center service is the entrance of all queries, including report/api/client. It distributes the query to backend db server(mysql/hive) and caches the query result. I implement the asynchronous query part of the service.
+        Hive authorization is not completely secure, and hiveserver(hive thrift service) is not stable. I manage to wrapper a thrift service called `openhive` above hive cli for hive query need of our engineers. Later we open our ETL design service to our engineers, I enhance hive authorization by adding some query hook and fixing authorization bugs.
 
 \iffalse
         \item upgrade hive version in production 
