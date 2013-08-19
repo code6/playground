@@ -2,6 +2,7 @@
 '''
    lru cache test, translate from 
    https://github.com/shenfeng/gocode/blob/master/src/thrift_proxy/lru_cache.go
+   Entry can be as simple as a tuple
 '''
 
 from linkedlist import LinkedList, Node
@@ -118,3 +119,38 @@ if __name__ == "__main__":
             cache.delete(i)
     print cache.data
     print cache.stats()
+    
+
+    cache = LRUCache(100)
+    for i in xrange(100):
+        cache.setex("key-%s" % i, 10, "value-%s" % i)
+    for i in xrange(100):
+        v = cache.get("key-%s" % i)
+        if not v:
+            print "GET", i, "error"
+
+    LOOP = 1000000
+
+    # bench mark setex, about 300k per seconds on i7-3770K
+    start = time.time()
+    cache = LRUCache(20000)
+    for i in xrange(LOOP):
+        cache.setex("key-%s" % (i % 20000), 10, "value-%s" % i)
+    e = (time.time() - start) * 1000
+    print cache.stats()
+
+    print "setex", LOOP, "takes time", e, "ms"
+
+    # benchmark get, about 700k per seconds i7-3770K
+    start = time.time()
+    for i in xrange(LOOP):
+        cache.get("key-%s" % (i % 2000))
+    e = (time.time() - start) * 1000
+    print cache.stats()
+    print "get", LOOP, "takes time", e, "ms"
+
+    from guppy import hpy
+
+    h = hpy()
+    print h.heap()
+
