@@ -105,8 +105,12 @@ int main() {
         range(i, m) {
             int a, b;
             cin >> a >> b;
-            if (tags[a] != tags[b])
+            if (tags[a] != tags[b]) {
+                if (tags[a] == 'A') 
                     add_edge(a, b, INF);
+                else
+                    add_edge(b,a, INF);
+            }
         }
         cout << max_flow(0, n + 1) << endl;
     }
