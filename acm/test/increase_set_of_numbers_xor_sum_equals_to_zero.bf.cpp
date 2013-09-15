@@ -1,5 +1,4 @@
 /* --- Author: Vladimir Smykalov, enot.1.10@gmail.com --- */
-// ref :http://stackoverflow.com/questions/14199255/increase-set-of-numbers-so-that-xor-sum-is-0/18732484#18732484
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
@@ -108,6 +107,14 @@ void dfs(vector<ll> v, int dep) {
         return;
     }
 
+    int cost = 0;
+    range(i, n) {
+        cost += v[i] - ori_v[i];
+    }
+    if (cost > ans2) {
+        return;
+    }
+
     range(i, limit + 1) {
         if (i < v[dep]) {
             continue;
@@ -121,6 +128,7 @@ void dfs(vector<ll> v, int dep) {
 int main() {
 #ifndef ONLINE_JUDGE
     freopen("g.in", "r", stdin);
+    freopen("g.out", "w", stdout);
 #endif
     while (cin >> n) {
         ori_v.clear();
@@ -132,33 +140,42 @@ int main() {
             ma = max(val, ma);
         }
 
-
-        M.clear();
-        ans2 = mem(0, 31);
-        range(i, 31) {
-            int j = 31 - i;
-            bool all_one = true;
-            range(i, n) {
-                if (!(two(j) & ori_v[i])) {
-                    all_one = false;
-                    break;
-                }
-            }
-            if (all_one) {
-                range(i, n) {
-                    ori_v[i] += two(j);
-                    M.clear();
-                    ori_v[i] -= two(j);
-                }
-            }
-        }
-
-
-
         limit = 1;
         while (limit < ma) limit *= 2;
         limit *= 2;
 
+        int len = 0;
+        ll tmp = ma;
+        while (tmp) len ++, tmp >>= 1;
+        len ++;
+
+        M.clear();
+        ans2 = mem(0, 31);
+        bool even_bit = true;
+        for (int i = len; i >= 0; i--) {
+            int cnt = 0;
+            for (int j = 0; j < n; j++) cnt += (two(i) & ori_v[j]) > 0;
+            even_bit &= cnt % 2 == 0;
+            if (even_bit) {
+                for (int j = 0; j < n; j++) {
+                    if (!(two(i) & ori_v[j])) {
+                        ll backup = ori_v[j];
+                        ori_v[j] = two(i);
+                        M.clear();
+                        ll tmp = mem(0, i);
+                        if (tmp != -1) {
+                            tmp += two(i) - backup % two(i);
+                        }
+                        update(ans2, tmp);
+                        ori_v[j] = backup;
+                    }
+                }
+            }
+        }
+
+        cout << ans2 << endl;
+
+        /*
         ans = -1;
         dfs(ori_v, 0);
         if (ans != ans2) {
@@ -167,6 +184,7 @@ int main() {
             cout << ans << ' ' << ans2<< endl;
             break;
         }
+        */
     }
 
     return 0;
