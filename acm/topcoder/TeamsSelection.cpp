@@ -80,7 +80,16 @@ Returns: "121121212"
 #include <algorithm>
 using namespace std;
 
+#define fs first
+#define sc second
+#define pb push_back
 #define mp make_pair
+#define range(i, n) for (int i=0; i<(n); ++i)
+#define all(a) (a).begin(),a.end()
+#define two(i) (1<<(i))
+
+typedef vector<int> VI;
+typedef pair<int, int> PII;
 
 class TeamsSelection
 {
