@@ -142,28 +142,32 @@ public:
                  if (!dp[i][j][k]) {
                      continue;
                  }
+          //       if (N == 2) cout << i << ' ' << j << ' ' << k << ' ' << dp[i][j][k] << endl;
                  //i + 1 use at i + 1
                  update(dp[i+1][j][k+(i+1)], dp[i][j][k]);
                  //i + 1 use at lower
-                 update(dp[i+1][j][k+(i+1)], dp[i][j][k] * j);
+                 update(dp[i+1][j][k+(i+1)], (long long)dp[i][j][k] * j % MOD);
 
                  //i + 1 use at lower and put one of [1 .. j]  at i + 1
                  if (j)
-                     update(dp[i+1][j - 1][k+(i+1) * 2], dp[i][j][k] * j * j);
+                     update(dp[i+1][j - 1][k+(i+1) * 2], (long long)dp[i][j][k] * j * j % MOD);
 
                  //i + 1 not use
                  update(dp[i+1][j + 1][k], dp[i][j][k]);
 
                  //i + 1 not use, put one of [1 .. j] 
-                 update(dp[i+1][j][k+(i+1)], dp[i][j][k] * j);
+                 update(dp[i+1][j][k+(i+1)], (long long)dp[i][j][k] * j % MOD);
              }
          }
      }
      int ans = 0;
      range(i, N * N + 5) {
+         //if (N == 2 && dp[N][0][i]) cout << N << ' ' << 0 << ' ' << i << ' ' << dp[N][0][i] << endl;
          if (i >= K)
              update(ans, dp[N][0][i]);
      }
+
+     range(i, N) ans = (long long)ans * (i + 1) % MOD;
 
      return ans;
  //$CARETPOSITION$
