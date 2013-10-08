@@ -109,6 +109,16 @@ using namespace std;
 typedef vector<int> VI;
 typedef pair<int, int> PII;
 
+const int OFFSET= 10000 * 50 + 50;
+const int MAX = 2 * OFFSET;
+int dp[2][MAX];
+
+void clear(int dp[]) {
+    range(i, MAX) {
+        dp[i] = MAX;
+    }
+}
+
 class MayTheBestPetWin
 {
 public:
@@ -116,33 +126,32 @@ public:
  {
  //$CARETPOSITION$
     int n = A.size();
-    int vx = 0;
-    range(i, n) vx += B[i] - A[i];
-    vector<int> vv;
-    range(i, n) vv.pb(A[i] + B[i]);
-    sort(vv.begin(), vv.end());
-    int limit = vv.back() * 2 + 5000;
 
-    set<int> now, pre;
-    now.insert(0);
+    int now, pre;
+    now = 0;
+    clear(dp[now]);
+    dp[now][0 + OFFSET] = 0;
     range(i, n) {
-        int val = vv[n - 1 - i];
         pre = now;
-        now.clear();
-        for (set<int>::iterator it=pre.begin(); it!=pre.end(); it++) {
-            if (abs(*it + val) < limit)
-                now.insert(*it + val);
-            if (abs(*it - val) < limit)
-                now.insert(*it - val);
+        now = !now;
+        clear(dp[now]);
+        range(j, MAX) {
+            int x, y;
+            x = j - OFFSET;
+            y = dp[pre][j];
+            if (y == MAX) {
+                continue;
+            }
+            dp[now][x + OFFSET + B[i]] = min(dp[now][x + OFFSET + B[i]], y - A[i]);
+            dp[now][x + OFFSET - A[i]] = min(dp[now][x + OFFSET - A[i]] , y + B[i]);
         }
     }
 
     int ans = -1;
-    for (set<int>::iterator it = now.begin(); it != now.end(); it++) {
-        int vy = *it;
-        if ((vy + vx) % 2) continue;
-        int x = (vy + vx) / 2;
-        int y = vx - x;
+    range(j, MAX) {
+        int x, y;
+        x = j - OFFSET;
+        y = dp[now][j];
         int tmp = max(x, y);
         if (ans == -1) {
             ans = tmp; 
