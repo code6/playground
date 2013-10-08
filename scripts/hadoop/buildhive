@@ -1,0 +1,142 @@
+#!/bin/bash
+
+set -e
+
+help() {
+  echo "automate hive local test and package"
+  echo "Usage ./`basename $0` <parameters>"
+  echo "Parameters parsed:"
+  echo "  --prefix : package name prefix (hive-prefix), default is '' and package name is 'hive' "
+  echo "  --ant-opts : ant opts for package, default is ' clean package ' "
+  echo "  --source-dir : hive source dir, required "
+  echo "  --conf-dir : hive conf dir for merge with package, required"
+  echo "  --assemble-dir : hive assemble dir which package will locate, default is pwd"
+  echo "  --rebuild : rebuild hive package, otherwise will skip packaging "
+  echo "  --tar : tar hive package"
+  echo "  --dry-run : just dump conf, no run"
+  echo "  --help, -h : help"
+}
+
+dump_conf() {
+    echo "conf:"
+    echo "prefix=$prefix"
+    echo "ant_opts=$ant_opts"
+    echo "source_dir=$source_dir"
+    echo "build_dir=$build_dir"
+    echo "conf_dir=$conf_dir"
+    echo "assemble_dir=$assemble_dir"
+    echo "rebuild=$rebuild"
+    echo "tar=$tar"
+    echo "dry_run=$dry_run"
+}
+
+prefix=""
+ant_opts=" clean package "
+source_dir=""
+build_dir=""
+conf_dir=""
+assemble_dir="$PWD"
+rebuild=""
+tar=""
+dry_run=""
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --prefix)
+            shift
+            prefix=$1
+            shift
+            ;;
+        --ant-opts)
+            shift
+            ant_opts=$1
+            shift 
+            ;;
+        --source-dir)
+            shift
+            source_dir=$1
+            shift
+            build_dir=$source_dir/build/dist
+            ;;
+        --conf-dir)
+            shift
+            conf_dir=$1
+            shift
+            ;;
+        --assemble-dir)
+            shift
+            assemble_dir=$1
+            shift
+            ;;
+        --rebuild)
+            shift 1
+            rebuild="true"
+            ;;
+        --tar)
+            shift 1
+            tar="true"
+            ;;
+        --dry-run)
+            shift 1
+            dry_run="true"
+            ;;
+        --help|-h)
+            help
+            exit 0
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+if [ "$dry_run" != "" ]; then
+    dump_conf
+    exit 0
+fi
+
+#param verify
+if [ "$source_dir" = "" ]; then
+    echo "source_dir not provided"
+    exit 1
+fi
+
+if [ "$conf_dir" = "" ]; then
+    echo "conf_dir not provided"
+    exit 1
+fi
+
+#gen pacakge name
+if [ "$prefix" = "" ]; then
+    target=hive
+else
+    target=hive-$prefix
+fi
+
+target_dir=$assemble_dir/$target
+
+#backup if target_dir exists
+if [ -d "$target_dir" ]; then
+    echo "backup pacakge ..."
+    cd $assemble_dir
+    tar -cvzf $target.tar.gz $target/
+fi
+rm -rf $target_dir
+mkdir -p $target_dir
+
+#copy
+if [ "$rebuild" != "" ]; then
+    echo "rebuild package..."
+    cd $source_dir && ant $ant_opts
+fi
+
+#copy conf
+cp -fr $build_dir/* $target_dir
+cp -fr $conf_dir/* $target_dir
+
+#tar
+if [ "$tar" != "" ]; then
+    echo "tar package .."
+    cd $assemble_dir
+    tar -cvzf $target.tar.gz $target/
+fi
