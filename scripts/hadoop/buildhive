@@ -119,7 +119,7 @@ target_dir=$assemble_dir/$target
 if [ -d "$target_dir" ]; then
     echo "backup pacakge ..."
     cd $assemble_dir
-    tar -cvzf $target.tar.gz $target/
+    tar -cvzf $target.backup.tar.gz $target/
 fi
 rm -rf $target_dir
 mkdir -p $target_dir
