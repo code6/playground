@@ -6,7 +6,7 @@ help() {
   echo "automate hive local test and package"
   echo "Usage ./`basename $0` <parameters>"
   echo "Parameters parsed:"
-  echo "  --prefix : package name prefix (hive-prefix), default is '' and package name is 'hive' "
+  echo "  --suffix : package name suffix (hive-suffix), default is '' and package name is 'hive' "
   echo "  --ant-opts : ant opts for package, default is ' clean package ' "
   echo "  --source-dir : hive source dir, required "
   echo "  --conf-dir : hive conf dir for merge with package, required"
@@ -19,7 +19,7 @@ help() {
 
 dump_conf() {
     echo "conf:"
-    echo "prefix=$prefix"
+    echo "suffix=$suffix"
     echo "ant_opts=$ant_opts"
     echo "source_dir=$source_dir"
     echo "build_dir=$build_dir"
@@ -30,7 +30,7 @@ dump_conf() {
     echo "dry_run=$dry_run"
 }
 
-prefix=""
+suffix=""
 ant_opts=" clean package "
 source_dir=""
 build_dir=""
@@ -42,9 +42,9 @@ dry_run=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        --prefix)
+        --suffix)
             shift
-            prefix=$1
+            suffix=$1
             shift
             ;;
         --ant-opts)
@@ -107,10 +107,10 @@ if [ "$conf_dir" = "" ]; then
 fi
 
 #gen pacakge name
-if [ "$prefix" = "" ]; then
+if [ "$suffix" = "" ]; then
     target=hive
 else
-    target=hive-$prefix
+    target=hive-$suffix
 fi
 
 target_dir=$assemble_dir/$target
