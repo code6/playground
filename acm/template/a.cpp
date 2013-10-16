@@ -1,4 +1,8 @@
-/* --- Author: Vladimir Smykalov, enot.1.10@gmail.com --- */
+/* --- Author: Vladimir Smykalov, enot.1.10@gmail.com ---
+ * STL refer:
+ * a.insert(a.end(), b.begin(), b.end());
+ * copy(b.begin(), b.end(), back_inserter(a));
+ * */
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
