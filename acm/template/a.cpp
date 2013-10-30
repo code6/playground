@@ -125,6 +125,7 @@ int main() {
 #ifndef ONLINE_JUDGE
     freopen("c.in", "r", stdin);
 #endif
+    ios :: sync_with_stdio(false);
     vector<PII> vp;
     vp.pb(mp(5, 2));
     vp.pb(mp(3, 4));
