@@ -124,12 +124,6 @@ class LittleElephantAndIntervalsDiv1
 public:
  long long getNumber(int M, vector <int> L, vector <int> R)
  {
-     string s;
-     range(i, 50)  {
-         if (i) s += ',';
-         s += tostring(i + 1);
-     }
-     cout << s << endl;
  //$CARETPOSITION$
     vector<int> vc;
     vc.resize(M + 5);
