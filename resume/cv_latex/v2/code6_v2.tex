@@ -57,19 +57,18 @@
     I 'm working at \textbf{meituan data team}, I focus on data warehouse/platform tools building.\vspace{0.6mm}
 
     \begin{itemize}[leftmargin=3mm]
-        \item ETL tool upgrade\\
-      Sqlweaver is our data warehouse ETL tool. At first it only support mysql, I add different database supports by adding a concept called resouce handler and add support to hive and shard mysql table . I add another concept called action which enable loose ETL steps construct and code reuse, which works well for complex ETL tasks.
-        \item Data synchronization Tool\\
-    I build a data synchronization tool which supports data synchronization between different type of database(mysql/hive). Users only need to fill in the source and target table info and it will do the rest. We use it for our data synchronization tasks.
-        \item Migrate log process from Infobright to hive\\
-        I participate in the Infobright to Hive project and I design and carry out the ETL migration plan. I also build a small tool called diff\_checksum to check the table data consistency between the migration. This project lasts about two months and we transform all our infobright based ETLs(about 80) to hive.
+        \item Upgrade production hadoop version to 2.2.0 and enable hadoop security\\
+        Duration: 11/2013 -- 1/2014\\
+        When Hadoop 2 is Generally Available, we start our plan to migrate to yarn and enable hadoop  security at the meantime. In this project I'm mainly responsible for hadoop security research and deployment. I spend lots of time testing hadoop security setup process and security integration with client apps , and fixing problems caused by security. The upgrade process is very smooth and we finally start using yarn.
+        \item Upgrade production hive version to hive 0.11\\
+        Duration: 7/2013 -- 8/2013\\
+        Hive 0.11 has some nice features and improvements and we decide to move to hive 0.11. I'm in charge of this project. At first I maintain our productional version of hive 0.11 by patching our own commits base on hive 0.11 offical release. Then I build a tool which runs automated tests with productional hive sqls in different hive versions and generates diff result. After I fix all the problems I encounter I make final deployment and hive 0.11 runs well later.
         \item Hive authorization and query service enhancement\\
         Hive authorization is not completely secure, and hiveserver(hive thrift service) is not stable. I manage to wrapper a thrift service called `openhive` above hive cli for hive query need of our engineers. Later we open our ETL design service to our engineers, I enhance hive authorization by adding some query hook and fixing authorization bugs.
-
-\iffalse
-        \item upgrade hive version in production 
-\fi
-
+        \item Migrate log process from Infobright to hive\\
+        I participate in the Infobright to Hive project and I design and carry out the ETL migration plan. I also build a small tool called diff\_checksum to check the table data consistency between the migration. This project lasts about two months and we transform all our infobright based ETLs(about 80) to hive.
+        \item ETL tool upgrade\\
+      Sqlweaver is our data warehouse ETL tool. At first it only support mysql, I add different database supports by adding a concept called resouce handler and add support to hive and shard mysql table . I add another concept called action which enable loose ETL steps construct and code reuse, which works well for complex ETL tasks. Later I build a data synchronization tool base on sqlweaver which supports data synchronization between different type of database(mysql/hive). We use it for our data synchronization tasks.
     \end{itemize}
 
     
