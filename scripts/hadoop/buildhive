@@ -7,8 +7,9 @@ help() {
   echo "Usage ./`basename $0` <parameters>"
   echo "Parameters parsed:"
   echo "  --suffix : package name suffix (hive-suffix), default is '' and package name is 'hive' "
-  echo "  --ant-opts : ant opts for package, default is ' clean package ' "
+  echo "  --package-cmd : package cmd for package, default is ' ant clean package ' "
   echo "  --source-dir : hive source dir, required "
+  echo "  --build-dir : hive source build dir, default is $source-dir/build/dist "
   echo "  --conf-dir : hive conf dir for merge with package, required"
   echo "  --assemble-dir : hive assemble dir which package will locate, default is pwd"
   echo "  --rebuild : rebuild hive package, otherwise will skip packaging "
@@ -20,7 +21,7 @@ help() {
 dump_conf() {
     echo "conf:"
     echo "suffix=$suffix"
-    echo "ant_opts=$ant_opts"
+    echo "package_cmd=$package_cmd"
     echo "source_dir=$source_dir"
     echo "build_dir=$build_dir"
     echo "conf_dir=$conf_dir"
@@ -31,7 +32,7 @@ dump_conf() {
 }
 
 suffix=""
-ant_opts=" clean package "
+package_cmd=" ant clean package "
 source_dir=""
 build_dir=""
 conf_dir=""
@@ -47,16 +48,20 @@ while [ $# -gt 0 ]; do
             suffix=$1
             shift
             ;;
-        --ant-opts)
+        --package-cmd)
             shift
-            ant_opts=$1
+            package_cmd=$1
             shift 
             ;;
         --source-dir)
             shift
             source_dir=$1
             shift
-            build_dir=$source_dir/build/dist
+            ;;
+        --build-dir)
+            shift
+            build_dir=$1
+            shift
             ;;
         --conf-dir)
             shift
@@ -91,9 +96,14 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+
 if [ "$dry_run" != "" ]; then
     dump_conf
     exit 0
+fi
+
+if [ "$build_dir" = "" ]; then
+    build_dir=$source_dir/build/dist
 fi
 
 #param verify
@@ -128,7 +138,7 @@ mkdir -p $target_dir
 #copy
 if [ "$rebuild" != "" ]; then
     echo "rebuild package..."
-    cd $source_dir && ant $ant_opts
+    cd $source_dir && $package_cmd
 fi
 
 #copy conf
