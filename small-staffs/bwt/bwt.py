@@ -34,4 +34,5 @@ def inv_bwt(str):
 
 if __name__ == "__main__":
     s = "SIX.MIXED.PIXIES.SIFT.SIXTY.PIXIE.DUST.BOXES"
+    print bwt_py(s)
     print inv_bwt(bwt_py(s))
