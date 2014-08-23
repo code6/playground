@@ -1,3 +1,5 @@
+import d
+
 print "xxx"
 
 def ccc():
