@@ -140,10 +140,12 @@ public:
         int v = b[i] - 1;
         g[u][v] = g[v][u] = len[i];
     }
-    range(i, n)
-        range(j, n)
-            range(k, n)
+
+    range(k, n)
+        range(i, n)
+            range(j, n)
                 g[i][j] = min(g[i][j], g[i][k] + g[k][j]);
+
     int ans = 1;
     range(i, n)
         range(j, n)
@@ -153,8 +155,7 @@ public:
                 vector<int> arr;
                 arr.pb(i);
                 arr.pb(j);
-                range(k, n)
-                    if (k != i && k != j) {
+                range(k, n) {
                         bool ok = true;
                         range(u, arr.size()) {
                             if (g[k][arr[u]] != d) {
@@ -163,7 +164,7 @@ public:
                             }
                         }
                         if (ok) arr.pb(k);
-                    }
+                }
                 ans = max(ans, (int)arr.size());
             }
     return ans;

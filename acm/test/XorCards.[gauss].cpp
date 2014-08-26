@@ -215,7 +215,7 @@ ll generate(vector<ll>  a, ll target) {
         coe.pb(row);
     }
 
-    ll res = gauss_bad(coe, b);
+    ll res = gauss(coe, b);
 
     if (show) {
         cout << t << ' ' << res << endl;
@@ -229,11 +229,6 @@ public:
  long long numberOfWays(vector<long long> number, long long limit)
  {
  //$CARETPOSITION$
-    if (limit == 65535)  {
-        show = true;
-    } else {
-        show = false;
-    }
     ll ans = 0;
     ans += generate(number, limit);
     range(pos, 63) {
