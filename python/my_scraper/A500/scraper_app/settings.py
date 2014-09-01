@@ -8,9 +8,18 @@
 
 BOT_NAME = 'A500'
 
+COOKIES_ENABLED = False 
+
 SPIDER_MODULES = ['scraper_app.spiders']
 
-ITEM_PIPELINES = ['scraper_app.pipelines.A500Pipeline']
+ITEM_PIPELINES = {
+        'scraper_app.pipelines.A500Pipeline' : 500
+        }
+
+DOWNLOADER_MIDDLEWARES = {  
+        'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,  
+        'scraper_app.rotate_ua.RotateUserAgentMiddleware' :400  
+    }  
 
 DATABASE = {'drivername': 'mysql',
             'host': '127.0.0.1',

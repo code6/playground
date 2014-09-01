@@ -18,6 +18,8 @@ from scraper_app.items import Match, AsiaOdds
 
 class A500(BaseSpider):
     """Spider for regularly updated 500 site"""
+    download_delay = 1
+
     name = "A500"
     allowed_domains = ["500.com"]
     game_date = ""
@@ -124,26 +126,28 @@ class A500(BaseSpider):
             odds_item["water_a"] = odds_item["water_a"].replace(self.UP_CHAR, '').replace(self.DOWN_CHAR, '')
             odds_item["water_b"] = odds_item["water_b"].replace(self.UP_CHAR, '').replace(self.DOWN_CHAR, '')
 
-            odds_item["handicap_his"] = []
+            yield odds_item
 
-            url = self.asia_odds_inc_url % (odds_item["match_id"], odds_item["company_id"], int(time.time() * 1000))
-            request = scrapy.Request(url, headers={"X-Requested-With":"XMLHttpRequest"}, callback=self.parse_asia_odds_history)
-            request.meta['odds_item'] = odds_item
-            yield request
             #r = requests.get(url, headers={"X-Requested-With":"XMLHttpRequest"})
             #r.raise_for_status()
 
-        def parse_asia_odds_history(self, response):
-            odds_item = response.meta['odds_item']
-            his_selector = Selector(response)
-            tr_arr = his_selector.xpath(".//tr")
-            tr_arr.reverse()
-            for idx, tr in enumerate(tr_arr):
-                print [v[:v.index("\\n\\t")] for v in tr.xpath(".//td/text()").extract()]
-                d = dict(zip(["water_a", "handicap", "water_b", "update_time"], [v[:v.index("\\n\\t")] for v in tr.xpath(".//td/text()").extract()]))
-                d["idx"] = idx
-                odds_item["handicap_his"].append(d)
+            #odds_item["handicap_his"] = []
+            #url = self.asia_odds_inc_url % (odds_item["match_id"], odds_item["company_id"], int(time.time() * 1000))
+            #request = scrapy.Request(url, callback=self.parse_asia_odds_history, headers={"X-Requested-With":"XMLHttpRequest"})
+            #request.meta['odds_item'] = odds_item
+            #yield request
 
-            odds_item["handicap_his"] = json.dumps(odds_item["handicap_his"])
+    def parse_asia_odds_history(self, response):
+        odds_item = response.meta['odds_item']
+        his_selector = Selector(response)
+        tr_arr = his_selector.xpath(".//tr")
+        tr_arr.reverse()
+        for idx, tr in enumerate(tr_arr):
+            d = dict(zip(["water_a", "handicap", "water_b", "update_time"], \
+                    [v[:v.index("\\n\\t")] if "\\n\\t" in v else v.strip() for v in tr.xpath(".//td/text()").extract()]))
+            d["idx"] = idx
+            odds_item["handicap_his"].append(d)
 
-            yield odds_item
+        odds_item["handicap_his"] = json.dumps(odds_item["handicap_his"])
+
+        yield odds_item

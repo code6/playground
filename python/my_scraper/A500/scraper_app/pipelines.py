@@ -31,7 +31,7 @@ class A500Pipeline(object):
         obj = cls(**item)
 
         try:
-            session.add(obj)
+            session.merge(obj)
             session.commit()
         except:
             session.rollback()
