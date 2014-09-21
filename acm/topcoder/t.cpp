@@ -11,6 +11,11 @@ void f(int x) {
 } 
  
 int main(void) {
-  f(INT_MIN);
+    string s(3, ' ');
+    s[0] = char(0);
+    s[1] = char(0);
+    s[2] = char(0);
+    cout << s.size() << endl;
+  //f(INT_MIN);
   return 0;
 }
