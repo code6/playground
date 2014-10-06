@@ -1,3 +1,4 @@
+#coding=utf8
 """
 Template for Project 3
 Student will implement four functions:
@@ -11,7 +12,11 @@ where cluster_list is a list of clusters in the plane
 """
 
 import math
+import random
+import time
 import alg_cluster
+import alg_project3_viz
+from matplotlib import pyplot as plt
 
 EPS = 1e-9
 
@@ -125,7 +130,6 @@ def fast_closest_pair(cluster_list):
     answer = fast_helper(cluster_list, horiz_order, vert_order) 
     return (answer[0], min(answer[1:]), max(answer[1:]))
 
-    
 
 def hierarchical_clustering(cluster_list, num_clusters):
     """
@@ -136,6 +140,7 @@ def hierarchical_clustering(cluster_list, num_clusters):
     Output: List of clusters whose length is num_clusters
     """
     while len(cluster_list) > num_clusters:
+        #print "before loop: ", len(cluster_list), num_clusters
         #dist_tuple = list(slow_closest_pairs(cluster_list))[0]
         dist_tuple = fast_closest_pair(cluster_list)
         idx1, idx2 = dist_tuple[1:]
@@ -178,3 +183,72 @@ def kmeans_clustering(cluster_list, num_clusters, num_iterations):
             center_list[best_idx_list[idx]].merge_clusters(cluster_list[idx])
 
     return center_list
+
+def gen_random_clusters(num_clusters):
+    """
+     Creates a list of clusters where each cluster in this list corresponds to one randomly generated point in the square with corners (±1,±1)
+    """
+    cluster_list = []
+    for _ in range(num_clusters):
+        p = (random.random() * 2.0 - 1.0, random.random() * 2.0 - 1.0)
+        cluster_list.append(alg_cluster.Cluster(set(p), p[0], p[1], 0, 0.0))
+    return cluster_list
+
+def compute_distortion(cluster_list, data_table):
+    distortion = 0
+    for cluster in cluster_list:
+        distortion += cluster.cluster_error(data_table)
+    return distortion
+
+def q1():
+    xvals = []
+    y1vals = []
+    y2vals = []
+    for num_clusters in range(2, 201):
+        cluster_list = gen_random_clusters(num_clusters)
+        t1 = time.time()
+        slow_closest_pairs(cluster_list)
+        t2 = time.time()
+        fast_closest_pair(cluster_list)
+        t3 = time.time()
+        xvals.append(num_clusters)
+        y1vals.append((t2 - t1))
+        y2vals.append((t3 - t2))
+    plt.plot(xvals, y1vals, '-b', label='slow_closest_pairs')
+    plt.plot(xvals, y2vals, '-r', label='fast_closest_pair')
+    plt.legend(loc='upper right')
+    plt.xlabel('The number of initial clusters')
+    plt.ylabel('Running times in seconds')
+    plt.title('Running time of slow_closest_pairs/fast_closest_pair by desktop Python')
+    plt.show()
+
+def q10():
+    #county_size = 111
+    #county_size = 290 
+    county_size = 896
+    xvals = range(6, 21)
+    data_table = alg_project3_viz.load_data_from_file("unifiedCancerData_%d.csv" % (county_size))
+    y1vals = []
+    #k-means
+    singleton_list = alg_project3_viz.gen_singleton_list(data_table)
+    for num_clusters in xvals:
+        y1vals.append(compute_distortion(kmeans_clustering(singleton_list, num_clusters, 5), data_table))
+
+    #hierarchical
+    y2vals = []
+    singleton_list = alg_project3_viz.gen_singleton_list(data_table)
+    for num_clusters in reversed(xvals):
+        y2vals.append(compute_distortion(hierarchical_clustering(singleton_list, num_clusters), data_table))
+    y2vals.reverse()
+
+    plt.plot(xvals, y2vals, '-b', label='hierarchical_clustering')
+    plt.plot(xvals, y1vals, '-r', label='kmeans_clustering')
+    plt.legend(loc='upper right')
+    plt.xlabel('The number of output clusters')
+    plt.ylabel('The distortion of the clustering')
+    plt.title('%d county data sets' % (county_size))
+    plt.show()
+
+
+if __name__ == "__main__":
+    q10()

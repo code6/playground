@@ -45,7 +45,6 @@ def load_data_from_url(data_url):
     data_lines = data.split('\n')
     return load_data_table(data_lines)
 
-
 def load_data_from_file(data_file):
     data_lines = open(data_file, "r").read().split('\n')
     return load_data_table(data_lines)
@@ -87,6 +86,12 @@ def sequential_clustering(singleton_list, num_clusters):
             cluster_list[-1] = cluster_list[-1].merge_clusters(new_cluster)
             
     return cluster_list
+
+def gen_singleton_list(data_table):
+    singleton_list = []
+    for line in data_table:
+        singleton_list.append(alg_cluster.Cluster(set([line[0]]), line[1], line[2], line[3], line[4]))
+    return singleton_list
                 
 
 #####################################################################
@@ -102,12 +107,12 @@ def run_example():
     Set DESKTOP = True/False to use either matplotlib or simplegui
     """
     #data_table = load_data_table(DATA_3108_URL)
-    data_table = load_data_from_file("unifiedCancerData_111.csv")
+    #data_table = load_data_from_file("unifiedCancerData_290.csv")
     #data_table = load_data_from_file("unifiedCancerData_896.csv")
+    #data_table = load_data_from_file("unifiedCancerData_3108.csv")
+    data_table = load_data_from_file("unifiedCancerData_111.csv")
+    singleton_list = gen_singleton_list(data_table)
     
-    singleton_list = []
-    for line in data_table:
-        singleton_list.append(alg_cluster.Cluster(set([line[0]]), line[1], line[2], line[3], line[4]))
 
     #print alg_project3.fast_closest_pair(singleton_list)
     #print alg_project3.slow_closest_pairs(singleton_list)
@@ -115,13 +120,16 @@ def run_example():
     #cluster_list = sequential_clustering(singleton_list, 15)    
     #print "Displaying", len(cluster_list), "sequential clusters"
 
-    #cluster_list = alg_project3.hierarchical_clustering(singleton_list, 9)
-    #print "Displaying", len(cluster_list), "hierarchical clusters"
-
-    cluster_list = alg_project3.kmeans_clustering(singleton_list, 40, 10)   
+    cluster_list = alg_project3.kmeans_clustering(singleton_list, 9, 5)
     print "Displaying", len(cluster_list), "k-means clusters"
-    for cluster in cluster_list:
-        print cluster
+    print "compute_distortion : ", alg_project3.compute_distortion(cluster_list, data_table)
+
+    cluster_list = alg_project3.hierarchical_clustering(singleton_list, 9)
+    print "Displaying", len(cluster_list), "hierarchical clusters"
+    print "compute_distortion : ", alg_project3.compute_distortion(cluster_list, data_table)
+
+    #for cluster in cluster_list:
+    #    print cluster
 
             
     #draw the clusters using matplotlib or simplegui
@@ -129,8 +137,9 @@ def run_example():
     #    alg_clusters_matplotlib.plot_clusters(data_table, cluster_list, True)
     #else:
     #    alg_clusters_simplegui.PlotClusters(data_table, cluster_list)
-    
-run_example()
+    #
+if __name__ == "__main__":
+    run_example()
 
 
 
