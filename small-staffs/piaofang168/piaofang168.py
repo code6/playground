@@ -17,7 +17,6 @@ if __name__ == "__main__":
         line = []
         for td in tr.findAll('td'):
             line.append(td.text)
-        table.append(line)
         if line:
             print ",".join(line)
 
