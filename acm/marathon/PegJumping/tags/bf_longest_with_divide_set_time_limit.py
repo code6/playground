@@ -228,11 +228,11 @@ class Game(object):
         random.shuffle(candidate)
         best = None
 
-        limit = 10
+        limit = 11
         if early_stage():
-            limit = 20
+            limit = 5
         elif middle_stage():
-            limit = 45
+            limit = 40
 
         for i in xrange(min(len(candidate), limit)):
             r, c = candidate[i]
@@ -266,7 +266,7 @@ class Game(object):
                     if total > 200 and 1.0 * removed / total > 0.25:
                         ng = self.divide(g)
                         groups.extend(ng)
-                        #cerr("try to divide group into %s" % len(ng))
+                        cerr("try to divide group into %s" % len(ng))
                         break
                 else:
                     break

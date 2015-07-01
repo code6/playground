@@ -7,8 +7,6 @@ from copy import deepcopy
 MAX_REC = 26000
 import sys
 import heapq
-import random
-import time
 sys.setrecursionlimit(MAX_REC)
 read_ints = lambda: map(int, raw_input().split())
 read_floats = lambda: map(float, raw_input().split())
@@ -17,23 +15,12 @@ MAX_STATE = 1000
 DIR = [(-2, 0), (2, 0), (0, -2), (0, 2)]
 ADJ_DIR = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 DIR_NAME = ["U", "D", "L", "R"]
-START_TS = time.time()
 
-random.seed(47)
-
-def elapse():
-    return time.time() - START_TS
-
-def early_stage():
-    return elapse() < 3.0
-
-def middle_stage():
-    e = elapse()
-    return  e < 6.0 and e > 3.0
 
 def cerr(msg):
     print >> sys.stderr, msg
     sys.stderr.flush()
+
 
 class State(object):
 
@@ -123,7 +110,7 @@ class Game(object):
     def divide(self, peg_list):
         groups = []
         vis = set()
-        for x, y in peg_list:
+        for x,y in peg_list:
             if not (self.has_peg(x, y) and not (x, y) in vis):
                 continue
             g = set()
@@ -136,11 +123,12 @@ class Game(object):
                 for dr in [-2, -1, 0, 1, 2]:
                     for dc in [-2, -1, 0, 1, 2]:
                         nr, nc = r + dr, c + dc
-                        if not (self.has_peg(nr, nc) and not (nr, nc) in vis):
+                        if not (self.has_peg(nr, nc) and not (nr, nc) in
+                                vis):
                             continue
                         g.add((nr, nc))
                         Q.put((nr, nc))
-                        vis.add((nr, nc))
+                        vis.add((nr,nc))
             groups.append(g)
         return groups
 
@@ -168,7 +156,7 @@ class Game(object):
             r, c = nr, nc
         self.score += sum * len(dirs)
         self.steps.append(step)
-        return r, c, len(dirs)
+        return r, c
 
     def h(self):
         pass
@@ -194,20 +182,8 @@ class Game(object):
             cur_list = next_list
         return best
 
-    def bf_one_step_at(self, r, c):
-        assert self.valid_cell(r, c) and self.has_peg(r, c)
-        state = State(self, r, c)
-        while True:
-            found = False
-            for d in DIR_NAME:
-                if state.can_move(d):
-                    state.run(d)
-                    found = True
-            if not found:
-                break
-        return state
-
     def can_move(self, r, c):
+        dirs = []
         if not self.valid_cell(r, c) or self.bo[r][c] == 0:
             return dirs
         for i in xrange(len(DIR)):
@@ -217,59 +193,33 @@ class Game(object):
                 not self.has_peg(r + dr, c + dc) and \
                 self.valid_cell(r + ar, c + ac) and \
                 self.has_peg(r + ar, c + ac):
-                    return True
+                dirs.append(DIR_NAME[i])
+        return "".join(dirs)
 
     def bf_one_step(self, group):
-        candidate = []
+        best = None
         for r, c in group:
             if self.has_peg(r, c) and self.can_move(r, c):
-                candidate.append((r, c))
-
-        random.shuffle(candidate)
-        best = None
-
-        limit = 10
-        if early_stage():
-            limit = 20
-        elif middle_stage():
-            limit = 45
-
-        for i in xrange(min(len(candidate), limit)):
-            r, c = candidate[i]
-            state = self.bf_one_largest_step_at(r, c)
-            #state = self.bf_one_step_at(r, c)
-            if not best or best < state:
-                best = state
+                #cerr("at bf_one_step, r=%s, c=%s" % (r, c))
+                state = self.bf_one_largest_step_at(r, c)
+                if not best or best < state:
+                    best = state
 
         if best:
             return best.step()
 
-    def gen_groups(self):
-        peg_list = [(i, j) for i in xrange(self.N) for j in xrange(self.N)
-                    if self.has_peg(i, j)]
-        groups = self.divide(peg_list)
-        return groups
-
     def bf(self):
-        groups = self.gen_groups()
+        peg_list = [(i, j) for i in xrange(self.N) for j in xrange(self.N) if self.has_peg(i, j)]
+        groups = self.divide(peg_list)
         while groups:
-            #cerr("group.size = %s" % len(groups))
+            cerr("group.size = %s" % len(groups))
             g = groups.pop()
-            total = len(g)
-            removed = 0
-            while True:
-                step = self.bf_one_step(g)
-                if step:
-                    r, c, cnt = self.run(step)
-                    removed += cnt
-                    g.add((r, c))
-                    if total > 200 and 1.0 * removed / total > 0.25:
-                        ng = self.divide(g)
-                        groups.extend(ng)
-                        #cerr("try to divide group into %s" % len(ng))
-                        break
-                else:
-                    break
+            step = self.bf_one_step(g)
+            if step:
+                r, c = self.run(step)
+                g.add((r, c))
+                for ng in self.divide(g):
+                    groups.append(g)
 
 class PegJumping(object):
 

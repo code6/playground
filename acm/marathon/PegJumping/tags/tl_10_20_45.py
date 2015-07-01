@@ -266,7 +266,7 @@ class Game(object):
                     if total > 200 and 1.0 * removed / total > 0.25:
                         ng = self.divide(g)
                         groups.extend(ng)
-                        #cerr("try to divide group into %s" % len(ng))
+                        cerr("try to divide group into %s" % len(ng))
                         break
                 else:
                     break
