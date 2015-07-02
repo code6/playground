@@ -404,10 +404,12 @@ class Game(object):
                     r, c, cnt, score = self.run(step, g)
                     if cnt > best_cnt:
                         best_cnt = cnt
-                        #cerr("best_cnt update: r=%s, c=%s, cnt=%s, score=%s" % (r, c, cnt, score))
+                        cerr("best_cnt update: r=%s, c=%s, cnt=%s, score=%s" %
+                             (r, c, cnt, score))
                     if score > best_score:
                         best_score = score
-                        #cerr("best_score update: r=%s, c=%s, cnt=%s, score=%s, elapse=%s" % (r, c, cnt, score, elapse()))
+                        cerr("best_score update: r=%s, c=%s, cnt=%s, score=%s, elapse=%s" %
+                             (r, c, cnt, score, elapse()))
                     if total > 200 and 1.0 * len(g) / total > 0.25:
                         ng = self.divide(g)
                         groups.extend(ng)

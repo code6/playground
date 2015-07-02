@@ -13,7 +13,7 @@ sys.setrecursionlimit(MAX_REC)
 read_ints = lambda: map(int, raw_input().split())
 read_floats = lambda: map(float, raw_input().split())
 
-MAX_STATE = 10
+MAX_STATE = 50
 MAX_REC_START_POS_TRY = 1
 DIR = [(-2, 0), (2, 0), (0, -2), (0, 2)]
 ADJ_DIR = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -40,11 +40,6 @@ def elapse():
 def early_stage():
     return elapse() < 3.0
 
-def late_stage():
-    return elapse() > 9.0
-
-def end_stage():
-    return elapse() > 14.0
 
 def middle_stage():
     e = elapse()
@@ -179,7 +174,6 @@ class Game(object):
         if (r, c) in group:
             group.remove((r, c))
 
-
         sum = 0
         for d in dirs:
             pos = DIR_NAME.index(d)
@@ -217,8 +211,7 @@ class Game(object):
             #cerr("dep = %s, cur_list size=%s" % (dep, len(cur_list)))
             cur_list = sorted(cur_list, key=lambda s: -s.score())
             next_list = []
-            state_limit = MAX_STATE if not late_stage() else 5
-            for i in xrange(min(len(cur_list), state_limit)):
+            for i in xrange(min(len(cur_list), MAX_STATE)):
                 state = cur_list[i]
                 for d in DIR_NAME:
                     if state.can_move(d, ignore_dest_peg):
@@ -284,7 +277,7 @@ class Game(object):
         if early_stage():
             limit = 20
         elif middle_stage():
-            limit = 10 
+            limit = 30 
 
         for i in xrange(min(len(candidates), limit)):
             r, c = candidates[i]
@@ -382,21 +375,17 @@ class Game(object):
 
         left_cnt = len(set((x, y) for (x, y) in blocks if self.has_peg(x, y)))
 
-        #cerr("block_cnt = %s,removed = %s" % (block_cnt, left_cnt))
+        cerr("block_cnt = %s,removed = %s" % (block_cnt, left_cnt))
 
     def bf(self):
-        #cerr("N=%s" % self.N)
+        cerr("N=%s" % self.N)
         best_cnt = 0
         best_score = 0
         groups = self.gen_groups()
         while groups:
-            if end_stage():
-                break
             g = groups.pop()
             total = len(g)
             while True:
-                if end_stage():
-                    break
                 r, c = self.get_rec_start_pos(g)
                 self.remove_rec_blocks(r, c, g)
                 step = self.bf_one_step(g)
@@ -404,10 +393,12 @@ class Game(object):
                     r, c, cnt, score = self.run(step, g)
                     if cnt > best_cnt:
                         best_cnt = cnt
-                        #cerr("best_cnt update: r=%s, c=%s, cnt=%s, score=%s" % (r, c, cnt, score))
+                        cerr("best_cnt update: r=%s, c=%s, cnt=%s, score=%s" %
+                             (r, c, cnt, score))
                     if score > best_score:
                         best_score = score
-                        #cerr("best_score update: r=%s, c=%s, cnt=%s, score=%s, elapse=%s" % (r, c, cnt, score, elapse()))
+                        cerr("best_score update: r=%s, c=%s, cnt=%s, score=%s" %
+                             (r, c, cnt, score))
                     if total > 200 and 1.0 * len(g) / total > 0.25:
                         ng = self.divide(g)
                         groups.extend(ng)

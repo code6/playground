@@ -13,7 +13,7 @@ sys.setrecursionlimit(MAX_REC)
 read_ints = lambda: map(int, raw_input().split())
 read_floats = lambda: map(float, raw_input().split())
 
-MAX_STATE = 10
+MAX_STATE = 50
 MAX_REC_START_POS_TRY = 1
 DIR = [(-2, 0), (2, 0), (0, -2), (0, 2)]
 ADJ_DIR = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -40,11 +40,6 @@ def elapse():
 def early_stage():
     return elapse() < 3.0
 
-def late_stage():
-    return elapse() > 9.0
-
-def end_stage():
-    return elapse() > 14.0
 
 def middle_stage():
     e = elapse()
@@ -179,7 +174,6 @@ class Game(object):
         if (r, c) in group:
             group.remove((r, c))
 
-
         sum = 0
         for d in dirs:
             pos = DIR_NAME.index(d)
@@ -217,8 +211,7 @@ class Game(object):
             #cerr("dep = %s, cur_list size=%s" % (dep, len(cur_list)))
             cur_list = sorted(cur_list, key=lambda s: -s.score())
             next_list = []
-            state_limit = MAX_STATE if not late_stage() else 5
-            for i in xrange(min(len(cur_list), state_limit)):
+            for i in xrange(min(len(cur_list), MAX_STATE)):
                 state = cur_list[i]
                 for d in DIR_NAME:
                     if state.can_move(d, ignore_dest_peg):
@@ -230,14 +223,14 @@ class Game(object):
             cur_list = next_list
         return best
 
-    def bf_one_step_at(self, r, c, ignore_dest_peg=False):
+    def bf_one_step_at(self, r, c):
         assert self.valid_cell(r, c) and self.has_peg(r, c)
         state = State(self, r, c)
         while True:
             found = False
             for d in DIR_NAME:
                 if state.can_move(d):
-                    state.run(d, ignore_dest_peg)
+                    state.run(d)
                     found = True
             if not found:
                 break
@@ -257,37 +250,22 @@ class Game(object):
                 return True
 
     def bf_one_step(self, group):
-        candidates = []
+        candidate = []
         for r, c in group:
             if self.has_peg(r, c) and self.can_move(r, c):
-                candidates.append((r, c))
+                candidate.append((r, c))
 
-        sub_group = []
-        for i in xrange(4):
-            sub_group.append(set())
-        for r, c in candidates:
-            ty = (r % 2) * 2 + c % 2
-            sub_group[ty].add((r, c))
-
-        candidates = []
-        for i in xrange(4):
-            if sub_group[i]:
-                minr, minc, maxr, maxc = self.border_pos(sub_group[i])
-                for r, c in sub_group[i]:
-                    if r == minr or r == maxr or c == minc or c == maxc:
-                        candidates.append((r, c))
-
-        random.shuffle(candidates)
+        random.shuffle(candidate)
         best = None
 
-        limit = 1
+        limit = 10
         if early_stage():
             limit = 20
         elif middle_stage():
-            limit = 10 
+            limit = 45
 
-        for i in xrange(min(len(candidates), limit)):
-            r, c = candidates[i]
+        for i in xrange(min(len(candidate), limit)):
+            r, c = candidate[i]
             state = self.bf_one_largest_step_at(r, c)
             #state = self.bf_one_step_at(r, c)
             if not best or best < state:
@@ -331,31 +309,29 @@ class Game(object):
                     best = tmp
                     best_pos = i
 
-        candidates = []
+        candidate = []
         minr, minc, maxr, maxc = self.border_pos(sub_group[best_pos])
         for r, c in sub_group[best_pos]:
             if r == minr or r == maxr or c == minc or c == maxc:
-                candidates.append((r, c))
-        random.shuffle(candidates)
+                candidate.append((r, c))
+        random.shuffle(candidate)
 
-        return candidates[0]
+        return candidate[0]
 
-        '''
         best = None
 
         for i in xrange(min(len(candidate), MAX_REC_START_POS_TRY)):
-            r, c = candidates[i]
+            r, c = candidate[i]
             state = self.bf_one_largest_step_at(r, c, True)
             if not best or best < state:
                 best = state
 
         cerr(
             "at get_rec_start_pos, group_size=%s, pos=%s, sub_group=%s, candidate_size=%s, best=%s"
-            % (len(group), best_pos, len(sub_group[best_pos]), len(candidates),
+            % (len(group), best_pos, len(sub_group[best_pos]), len(candidate),
                best))
 
         return best.r, best.c
-        '''
 
     def remove_rec_blocks(self, r, c, group):
         blocks = set()
@@ -382,21 +358,17 @@ class Game(object):
 
         left_cnt = len(set((x, y) for (x, y) in blocks if self.has_peg(x, y)))
 
-        #cerr("block_cnt = %s,removed = %s" % (block_cnt, left_cnt))
+        cerr("block_cnt = %s,removed = %s" % (block_cnt, left_cnt))
 
     def bf(self):
-        #cerr("N=%s" % self.N)
+        cerr("N=%s" % self.N)
         best_cnt = 0
         best_score = 0
         groups = self.gen_groups()
         while groups:
-            if end_stage():
-                break
             g = groups.pop()
             total = len(g)
             while True:
-                if end_stage():
-                    break
                 r, c = self.get_rec_start_pos(g)
                 self.remove_rec_blocks(r, c, g)
                 step = self.bf_one_step(g)
@@ -404,10 +376,12 @@ class Game(object):
                     r, c, cnt, score = self.run(step, g)
                     if cnt > best_cnt:
                         best_cnt = cnt
-                        #cerr("best_cnt update: r=%s, c=%s, cnt=%s, score=%s" % (r, c, cnt, score))
+                        cerr("best_cnt update: r=%s, c=%s, cnt=%s, score=%s" %
+                             (r, c, cnt, score))
                     if score > best_score:
                         best_score = score
-                        #cerr("best_score update: r=%s, c=%s, cnt=%s, score=%s, elapse=%s" % (r, c, cnt, score, elapse()))
+                        cerr("best_score update: r=%s, c=%s, cnt=%s, score=%s" %
+                             (r, c, cnt, score))
                     if total > 200 and 1.0 * len(g) / total > 0.25:
                         ng = self.divide(g)
                         groups.extend(ng)
