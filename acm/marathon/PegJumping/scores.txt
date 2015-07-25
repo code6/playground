@@ -1,8 +1,8 @@
-Seed: 1 	Score: 7698.000000 	Run time: 0.370616
-Seed: 2 	Score: 21120.000000 	Run time: 12.118388
+Seed: 1 	Score: 9895.000000 	Run time: 2.381706
+Seed: 2 	Score: 28728.000000 	Run time: 26.120006
 Seed: 3 	Score: 2588.000000 	Run time: 0.624082
-Seed: 4 	Score: 39372.000000 	Run time: 7.970733
-Seed: 5 	Score: 45005.000000 	Run time: 9.917455
+Seed: 4 	Score: 54967.000000 	Run time: 25.222184
+Seed: 5 	Score: 46000.000000 	Run time: 4.597674
 Seed: 6 	Score: 99966.000000 	Run time: 19.068644
 Seed: 7 	Score: 13959.000000 	Run time: 4.074893
 Seed: 8 	Score: 48311.000000 	Run time: 25.289881

@@ -14,7 +14,7 @@ read_ints = lambda: map(int, raw_input().split())
 read_floats = lambda: map(float, raw_input().split())
 
 MAX_STATE = 10
-MAX_REC_START_POS_TRY = 1
+MAX_REC_START_POS_TRY = 10
 DIR = [(-2, 0), (2, 0), (0, -2), (0, 2)]
 ADJ_DIR = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 DIR_NAME = ["U", "D", "L", "R"]
@@ -44,15 +44,19 @@ def late_stage():
     return elapse() > 9.0
 
 def end_stage():
-    return elapse() > 14.0
+    #return elapse() > 14.0
+    return False
 
 def middle_stage():
     e = elapse()
     return e < 6.0 and e > 3.0
 
 
-def cerr(msg):
-    print >> sys.stderr, msg
+def cerr(msg, newline=True):
+    if newline:
+        print >> sys.stderr, msg
+    else:
+        print >> sys.stderr, msg,
     sys.stderr.flush()
 
 
@@ -110,6 +114,22 @@ class State(object):
             self.r, self.c, self.cr, self.cc, len(self.dirs), self.score(),
             "".join(self.dirs))
 
+    def show(self):
+        for x in xrange(self.game.N):
+            for y in xrange(self.game.N):
+                if (x, y) in self.used_peg_set:
+                    cerr('o', False)
+                elif (x, y) == (self.r, self.c):
+                    cerr('s', False)
+                elif self.game.has_peg(x, y) and abs(x-self.r) % 2 == 0 and abs(y-self.c)%2 == 0:
+                    cerr('x', False)
+                elif self.game.has_peg(x, y):
+                    cerr('+', False)
+                else:
+                    cerr('.', False)
+
+            cerr("")
+
     def step(self):
         return "%s %s %s" % (self.r, self.c, "".join(self.dirs))
 
@@ -122,6 +142,7 @@ class Game(object):
         self.bo = deepcopy(board)
         self.score = 0
         self.steps = []
+        self.call_cnt_bf_one_largest_step_at = 0
 
     def valid_cell(self, r, c):
         return r >= 0 and r < self.N and c >= 0 and c < self.N
@@ -164,6 +185,8 @@ class Game(object):
                         Q.put((nr, nc))
                         vis.add((nr, nc))
             groups.append(g)
+
+        groups = sorted(groups, key=lambda g: len(g))
         return groups
 
     def runs(self, steps, group):
@@ -208,6 +231,7 @@ class Game(object):
         pass
 
     def bf_one_largest_step_at(self, r, c, ignore_dest_peg=False):
+        self.call_cnt_bf_one_largest_step_at += 1
         assert self.valid_cell(r, c) and self.has_peg(r, c)
         best = state = State(self, r, c)
         cur_list = [state]
@@ -256,10 +280,10 @@ class Game(object):
                 (not d or d == DIR_NAME[i]):
                 return True
 
-    def bf_one_step(self, group):
+    def guess_start_pegs(self, group):
         candidates = []
         for r, c in group:
-            if self.has_peg(r, c) and self.can_move(r, c):
+            if self.has_peg(r, c):
                 candidates.append((r, c))
 
         sub_group = []
@@ -272,28 +296,43 @@ class Game(object):
         candidates = []
         for i in xrange(4):
             if sub_group[i]:
+                sub_candidates = []
                 minr, minc, maxr, maxc = self.border_pos(sub_group[i])
+                #cerr("sub_group_sz=%s, val=%s" % (len(sub_group[i]), sub_group[i]))
+                #cerr("minr=%s,minc=%s,maxr=%s,maxc=%s" % (minr, minc, maxr, maxc))
                 for r, c in sub_group[i]:
                     if r == minr or r == maxr or c == minc or c == maxc:
-                        candidates.append((r, c))
+                        sub_candidates.append((r, c))
+                candidates.append(sub_candidates)
+        return candidates
+
+    def bf_one_step(self, group):
+
+        candidates = []
+        for c in self.guess_start_pegs(group):
+            for p in c:
+                if self.can_move(p[0], p[1]):
+                    candidates.append(p)
 
         random.shuffle(candidates)
         best = None
 
         limit = 1
         if early_stage():
-            limit = 20
+            limit = 30
         elif middle_stage():
-            limit = 10 
+            limit = 20 
 
         for i in xrange(min(len(candidates), limit)):
             r, c = candidates[i]
             state = self.bf_one_largest_step_at(r, c)
             #state = self.bf_one_step_at(r, c)
-            if not best or best < state:
+            if not best or best.score() < state.score():
                 best = state
 
         if best:
+            #best.show()
+            #exit(0)
             return best.step()
 
     def gen_groups(self):
@@ -313,49 +352,40 @@ class Game(object):
         return minr, minc, maxr, maxc
 
     def get_rec_start_pos(self, group):
-        sub_group = []
-        for i in xrange(4):
-            sub_group.append(set())
-        for r, c in group:
-            ty = (r % 2) * 2 + c % 2
-            sub_group[ty].add((r, c))
-
-        best_pos = -1
-        best_value = -1
-        for i in xrange(4):
-            if sub_group[i]:
-                good = len(sub_group[(i + 1) % 4]) + len(sub_group[(i + 2) % 4])
-                bad = len(sub_group[i]) - 1
-                tmp = good - bad
-                if best_pos == -1 or tmp > best:
-                    best = tmp
-                    best_pos = i
 
         candidates = []
-        minr, minc, maxr, maxc = self.border_pos(sub_group[best_pos])
-        for r, c in sub_group[best_pos]:
-            if r == minr or r == maxr or c == minc or c == maxc:
-                candidates.append((r, c))
+        for c in self.guess_start_pegs(group):
+            random.shuffle(c)
+            candidates.extend(c[:])
         random.shuffle(candidates)
 
-        return candidates[0]
+        #self.show(candidates)
 
-        '''
         best = None
 
-        for i in xrange(min(len(candidate), MAX_REC_START_POS_TRY)):
+        for i in xrange(min(len(candidates), MAX_REC_START_POS_TRY)):
             r, c = candidates[i]
             state = self.bf_one_largest_step_at(r, c, True)
-            if not best or best < state:
+            #cerr("elapse time=%s state=%s" % (elapse(), state))
+            if not best or best.score() < state.score():
                 best = state
 
-        cerr(
-            "at get_rec_start_pos, group_size=%s, pos=%s, sub_group=%s, candidate_size=%s, best=%s"
-            % (len(group), best_pos, len(sub_group[best_pos]), len(candidates),
-               best))
+        cerr("at get_rec_start_pos, group_size=%s, candidate_size=%s, best=%s"
+            % (len(group), len(candidates), best))
+        best.show()
 
         return best.r, best.c
-        '''
+
+    def remove_peg(self, r, c, blocks=set()):
+        assert self.has_peg(r, c)
+        for i in xrange(4):
+            ax, ay = ADJ_DIR[i]
+            nx, ny = r + ax, c + ay
+            if (nx, ny) in blocks:
+                continue
+            if self.has_peg(nx, ny) and self.can_move(nx, ny, opposite_dir(DIR_NAME[i])):
+                step = "%s %s %s" % (nx, ny, opposite_dir(DIR_NAME[i]))
+                return step
 
     def remove_rec_blocks(self, r, c, group):
         blocks = set()
@@ -370,25 +400,49 @@ class Game(object):
             for x, y in blocks:
                 if not self.has_peg(x, y):
                     continue
-                for i in xrange(4):
-                    ax, ay = ADJ_DIR[i]
-                    nx, ny = x + ax, y + ay
-                    if self.has_peg(nx, ny) and self.can_move(nx, ny, opposite_dir(DIR_NAME[i])):
-                        step = "%s %s %s" % (nx, ny, opposite_dir(DIR_NAME[i]))
-                        self.run(step, group)
-                        found = True
+                step = self.remove_peg(x, y)
+                if step:
+                    self.run(step, group)
+                    found = True
+                else:
+                    for i in xrange(4):
+                        continue
+                        ax, ay = ADJ_DIR[i]
+                        nx, ny = x + ax, y + ay
+                        if not self.has_peg(nx, ny):
+                            continue
+                        step = self.remove_peg(nx, ny, blocks)
+                        if step:
+                            self.run(step, group)
+                            found = True
+                        else:
+                            pass
             if not found:
                 break
 
         left_cnt = len(set((x, y) for (x, y) in blocks if self.has_peg(x, y)))
 
-        #cerr("block_cnt = %s,removed = %s" % (block_cnt, left_cnt))
+        cerr("block_cnt = %s,removed = %s" % (block_cnt, left_cnt))
+        #cerr("elapse=%s" % elapse())
+
+    def show(self, p):
+        for x in xrange(self.N):
+            for y in xrange(self.N):
+                if (x, y) in p:
+                    cerr('o', False)
+                elif self.has_peg(x, y):
+                    cerr('+', False)
+                else:
+                    cerr('.', False)
+            cerr("")
 
     def bf(self):
-        #cerr("N=%s" % self.N)
         best_cnt = 0
         best_score = 0
         groups = self.gen_groups()
+        #for g in groups:
+        #    cerr("group size=%s, show:" % len(g))
+        #    self.show(g)
         while groups:
             if end_stage():
                 break
@@ -407,14 +461,16 @@ class Game(object):
                         #cerr("best_cnt update: r=%s, c=%s, cnt=%s, score=%s" % (r, c, cnt, score))
                     if score > best_score:
                         best_score = score
-                        #cerr("best_score update: r=%s, c=%s, cnt=%s, score=%s, elapse=%s" % (r, c, cnt, score, elapse()))
-                    if total > 200 and 1.0 * len(g) / total > 0.25:
+                    cerr("update: r=%s, c=%s, cnt=%s, score=%s, elapse=%s" % (r, c, cnt, score, elapse()))
+                    if total > 200 and 1.0 * (total - len(g)) / total < 0.5:
                         ng = self.divide(g)
                         groups.extend(ng)
-                        #cerr("try to divide group into %s" % len(ng))
+                        cerr("try to divide group into %s subgroup" % len(ng))
                         break
                 else:
                     break
+        cerr("N=%s" % self.N)
+        cerr("bf_one_largest_step_at cnt=%s" % self.call_cnt_bf_one_largest_step_at)
 
 
 class PegJumping(object):
