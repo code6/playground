@@ -3,7 +3,7 @@
  */
 (function () {
     'use strict';
-    angular.module('app').factory('FlashService',
+    angular.module('lamuran.components.flash', []).factory('FlashService',
         ['$rootScope',
             function FlashService($rootScope) {
                 var service = {};

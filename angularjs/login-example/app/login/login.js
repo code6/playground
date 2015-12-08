@@ -1,23 +1,21 @@
 (function () {
     'use strict';
-    angular.module('app').controller('LoginCtrl', ['$location', 'UserService', 'FlashService', function ($location, UserService, FlashService) {
+    angular.module('lamuran').controller('LoginCtrl', function ($location, UserService, FlashService) {
         var vm = this;
 
         vm.login = login;
 
         function login() {
             vm.dataLoading = true;
-            UserService.Login.query({'email': vm.email, 'password': vm.password}, function (users) {
-                if (users.length > 0) {
+            UserService.login(vm.email, vm.password, function (response) {
+                if (response.success) {
+                    UserService.set_credentials(vm.email, vm.password);
                     $location.path('/');
                 } else {
                     FlashService.Error("Email or password is incorrect.");
                     vm.dataLoading = false;
                 }
-            }, function (response) {
-                FlashService.Error("Email or password is incorrect.");
-                vm.dataLoading = false;
             });
         }
-    }]);
+    });
 })();

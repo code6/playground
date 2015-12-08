@@ -6,10 +6,38 @@
     * [angular-app](https://github.com/angular-app/angular-app)
 * https://builtwith.angularjs.org/
 
+## angular develop guide check
+https://docs.angularjs.org/guide/services
+
 
 ## Question
 
 * 小文件过多怎么办？比如各个页面的js需要合起来吗？
+
+## 2015.8.7
+
+[devdocs](http://devdocs.io/) 离线文档太爽了。
+
+## 2015.8.6
+
+又隔了好久没学习了。。今天继续。
+感觉学前端补基础的话还是得把 js/css/html 都补充一下。。边学边模仿搞。
+
+## 2015.7.29
+
+昨天看到的一个问题是 service 有命名空间冲突的问题，不过现在不用担心。
+使用 angular-annotate 模块可以避免每次都显示添加依赖。
+打算使用 http://opentaste.co/login/ 这样单独一个 api 模块，看起来比较清楚简单。
+json-server 一旦是 post 就会加数据, 好囧。
+
+
+## 2015.7.28
+
+打算每天花点时间补点前端基础，先从 angularJS 的 develop guide 来吧。
+
+今天继续做 login/register 模块，考虑
+
+* 丰富 UserService，并实现 MockUserService, Mock版从 json-server 读数据且忽略安全问题。
 
 
 ## 2015.7.26

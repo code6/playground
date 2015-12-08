@@ -1,21 +1,22 @@
 (function () {
     'use strict';
-    angular.module('app').controller('RegisterCtrl', ['$location', 'UserService', 'FlashService', function ($location, UserService, FlashService) {
+    angular.module('lamuran').controller('RegisterCtrl', function ($location, UserService, FlashService) {
         var vm = this;
 
         vm.register = register;
 
         function register() {
             vm.dataLoading = true;
-            new UserService.Register({'email': vm.email, 'password': vm.password}).$save(function (response) {
+            UserService.register(vm.email, vm.password, function (response) {
                 if (response.success) {
                     FlashService.Success('Registration successful', true);
-                    $location.path('/login');
+                    UserService.set_credentials(vm.email, vm.password);
+                    $location.path('/');
                 } else {
                     FlashService.Error(response.message);
                     vm.dataLoading = false;
                 }
             });
         }
-    }]);
+    });
 })();

@@ -2,9 +2,11 @@
     'use strict';
 
 // Declare app level module which depends on views, and components
-    angular.module('app', [
+    angular.module('lamuran', [
         'ngRoute',
         'ngResource',
+        'lamuran.components.user',
+        'lamuran.components.flash',
     ]).config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -23,9 +25,15 @@
                 controllerAs: 'vm'
             })
             .otherwise({redirectTo: '/login'});
-    }]).run(['$rootScope', function ($rootScope) {
-        $rootScope.buildResourceUrl = function (path) {
-            return "http://localhost:3000/" + path;
-        };
-    }]);
+    }]).run(function ($rootScope, $location) {
+        $rootScope.API_PREFIX = "http://localhost:3000/api";
+        $rootScope.$on('$locationChangeStart', function (event, next, current) {
+            // redirect to login page if not logged in and trying to access a restricted page
+            var restrictedPage = $location.path() == '/';
+            var loggedIn = $rootScope.globals != undefined;
+            if (restrictedPage && !loggedIn) {
+                $location.path('/login');
+            }
+        });
+    });
 })();
