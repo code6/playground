@@ -27,7 +27,7 @@
 
 ## 工作经历 （近期）
 
-### 2015.5 - now 平台组 teamleader 后端开发 【杭州唯见】
+### 2015.5 - now 平台组 后端开发 【杭州唯见】
 
 * booknizer VR APP项目 2015.6 ~ 2015.9
 基于angularjs h5动态页 + laravel api接口 作为APP后端以及页面操作
@@ -47,7 +47,7 @@ angularjs + yii + laravel
 项目再开发与维护，不夜城是酒吧夜店sns项目，管易捷是移动办公OA
 yii + nodejs
 
-### 2011.3 - 2013.4 研发部  php teamleader 后端开发 【杭州也要买】
+### 2011.3 - 2013.4 研发部  php 后端开发 【杭州也要买】
 * 端口网
 类facebook sns, 系统组件开发，群组功能开发, 单元测试推行
 CodeIgniter + reids + mongodb + RPC
